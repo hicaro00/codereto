@@ -1,0 +1,125 @@
+openapi: 3.0.0
+info:
+  title: Alumno Microservice API
+  description: API documentation for managing alumnos (students) using WebFlux
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080
+
+paths:
+  /api/alumnos/record:
+    post:
+      summary: Record a new alumno
+      requestBody:
+        description: Alumno details
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AlumnoRequest'
+      responses:
+        '200':
+          description: Alumno recorded successfully
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '409':
+          description: Student with the same ID already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConflictError'
+
+  /api/alumnos/active:
+    get:
+      summary: Retrieve all active alumnos
+      responses:
+        '200':
+          description: Successful retrieval of active alumnos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AlumnoResponse'
+        '404':
+          description: No active alumnos found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+
+components:
+  schemas:
+    AlumnoRequest:
+      type: object
+      properties:
+        id:
+          type: string
+        nombre:
+          type: string
+        apellido:
+          type: string
+        estado:
+          type: string
+          enum: [activo, inactivo]
+        edad:
+          type: integer
+          format: int32
+
+    AlumnoResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        nombre:
+          type: string
+        apellido:
+          type: string
+        estado:
+          type: string
+          enum: [activo, inactivo]
+        edad:
+          type: integer
+          format: int32
+
+    ValidationError:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Validation error
+        details:
+          type: array
+          items:
+            type: string
+          example:
+            - "Id must be unique"
+            - "Nombre cannot be empty"
+            - "Apellido cannot be empty"
+            - "Estado must be 'activo' or 'inactivo'"
+            - "Edad must be a positive integer"
+
+    ConflictError:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Conflict
+        details:
+          type: string
+          example: Student with ID 'string' already exists.
+
+    NotFoundError:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Not Found
+        details:
+          type: string
+          example: No active alumnos found.
